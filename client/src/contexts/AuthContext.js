@@ -1,13 +1,19 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { auth } from '../firebase';
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, sendPasswordResetEmail, updateEmail, updatePassword } from 'firebase/auth';
+import React, { useState, useEffect, useContext } from "react";
+import { auth } from "../firebase";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  sendPasswordResetEmail,
+  updateEmail,
+  updatePassword,
+} from "firebase/auth";
 
 const AuthContext = React.createContext();
 
 export const useAuth = () => {
   return useContext(AuthContext);
 };
-
 
 export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState();
@@ -18,8 +24,8 @@ export const AuthProvider = ({ children }) => {
     let currUser = user.user;
     let response = {
       email: currUser.email,
-      firebase_id: currUser.uid
-    }
+      firebase_id: currUser.uid,
+    };
     if (currUser) {
       setCurrentUser(response);
       return response;
@@ -27,12 +33,12 @@ export const AuthProvider = ({ children }) => {
   };
 
   const login = async (email, password) => {
-    let user = await signInWithEmailAndPassword(auth, email, password)
+    let user = await signInWithEmailAndPassword(auth, email, password);
     let currUser = user.user;
     let response = {
       email: currUser.email,
-      firebase_id: currUser.uid
-    }
+      firebase_id: currUser.uid,
+    };
     if (currUser) {
       setCurrentUser(response);
       return response;
@@ -56,7 +62,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(user => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
       setCurrentUser(user);
       setLoading(false);
     });
@@ -71,7 +77,7 @@ export const AuthProvider = ({ children }) => {
     logout,
     resetPassword,
     updateUserEmail,
-    updateUserPassword
+    updateUserPassword,
   };
 
   return (

@@ -1,43 +1,44 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React from "react";
+import { Link } from "react-router-dom";
 
-const NavBar = ({user, logout }) => {
-
+const NavBar = ({ user, logout }) => {
   return (
-    <nav className='flex justify-between text-white bg-[#3D405B] absolute w-screen h-10 pl-4'>
-      <Link to='/' className='hover:bg-[#E07A5F] h-10 pt-2'>Braking Friendships</Link>
-      <ul className='flex gap-4 mr-4'>
+    <nav className="flex justify-between text-white bg-[#3D405B] absolute w-screen h-10 pl-4">
+      <Link to="/" className="hover:bg-[#E07A5F] h-10 pt-2">
+        Braking Friendships
+      </Link>
+      <ul className="flex gap-4 mr-4">
         {/* <li className={listItemStyle}>
           <Link to='/instructions'>Instructions</Link>
         </li> */}
-        {user &&
+        {user && (
           <>
             <li className={listItemStyle}>
-              <Link to='/profile/search'>Search</Link>
+              <Link to="/profile/search">Search</Link>
             </li>
             <li className={listItemStyle}>
-              <Link to='/profile'>Profile</Link>
+              <Link to="/profile">Profile</Link>
             </li>
             <li className={listItemStyle} onClick={() => logout()}>
-              <Link to='/'>Logout</Link>
+              <Link to="/">Logout</Link>
             </li>
           </>
-        }
-        {!user &&
+        )}
+        {!user && (
           <>
             <li className={listItemStyle}>
-              <Link to='/login'>Profile</Link>
+              <Link to="/login">Profile</Link>
             </li>
             <li className={listItemStyle}>
-              <Link to='/login'>Login</Link>
+              <Link to="/login">Login</Link>
             </li>
           </>
-        }
+        )}
       </ul>
     </nav>
-  )
-}
+  );
+};
 
-const listItemStyle = 'hover:bg-[#E07A5F] h-10 pt-2'
+const listItemStyle = "hover:bg-[#E07A5F] h-10 pt-2";
 
 export default NavBar;

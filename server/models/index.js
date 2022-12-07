@@ -11,7 +11,6 @@ module.exports = {
     }
   },
   getUserData: async (user) => {
-    console.log("user: ", user);
     try {
       const filter = { firebase_id: user.firebase_id };
       return await User.find(filter);
@@ -20,7 +19,6 @@ module.exports = {
     }
   },
   searchProfile: async (user) => {
-    console.log("Search user: ", user);
     try {
       const filter = { username: user.username };
       return await User.find(filter);
@@ -45,7 +43,6 @@ module.exports = {
     }
   },
   getFriendData: async (user) => {
-    console.log("friend: ", user);
     try {
       const filter = { username: user.username };
       return await User.find(filter);
@@ -54,7 +51,6 @@ module.exports = {
     }
   },
   createRoom: async (room) => {
-    console.log('creating room', room)
     try {
       return await Room.create(room);
     } catch (error) {
@@ -62,9 +58,11 @@ module.exports = {
     }
   },
   addPlayer: async (room, player) => {
-    // player._id = false;
     try {
-      return await Room.updateOne({room: room}, { $addToSet: {players: player}})
+      return await Room.updateOne(
+        { room: room },
+        { $addToSet: { players: player } }
+      );
     } catch {
       return error;
     }
@@ -88,24 +86,6 @@ module.exports = {
     try {
       const filter = { room: room };
       return await Room.deleteOne(filter);
-    } catch (error) {
-      return error;
-    }
-  },
-
-
-
-
-
-
-
-  // CREATE FAKE DUMMY DATA
-  createDummyData: async (user) => {
-    try {
-      const filter = { firebase_id: user.firebase_id };
-      // await User.drop();
-      await User.findOneAndUpdate(filter, user, { upsert: true });
-      return;
     } catch (error) {
       return error;
     }

@@ -12,7 +12,6 @@ const { instrument } = require("@socket.io/admin-ui");
 const io = require('socket.io')(httpServer, options);
 const { router, socketRouter } = require('./routes');
 
-
 const ShortUniqueId = require('short-unique-id');
 const uid = new ShortUniqueId({ length: 6 });
 
@@ -32,28 +31,20 @@ const shuffle = (targetArray) => {
 }
 
 io.on('connection', socket => {
-  // console.log(socket.id)
-
-
   const setInitialState = (gameState) => {
-    // TODO: get socket ids from game lobby room, those become the users in game state
-
     gameState.playerOrder = shuffle(gameState.playerOrder);
     gameState.initialOrder = [...gameState.playerOrder];
     // prevTurns should have socketid or username and play
     // we might not need prevTurns since nope just cancels a move before it's effect is played
     gameState.prevTurns = [];
     gameState.attackCount = 0;
-
     gameState.currentPlayer = gameState.playerOrder.shift();
-
     socket.ekGameState = gameState;
-
     emitState(socket.ekGameState);
   }
 
+  // TODO
   const updateState = (username, cardIdx) => {
-
   }
 
   const emitState = (gameState) => {
@@ -145,16 +136,12 @@ io.on('connection', socket => {
     let currPlayer = socket.ekGameState.currentPlayer;
     const playerOrder = socket.ekGameState.playerOrder;
 
-    // console.log('Player order before:', socket.ekGameState.playerOrder)
-
     if (currPlayer !== playerOrder[playerOrder.length - 1] && shouldAddToEnd) {
       playerOrder.push(currPlayer);
     }
     // Set current player
     socket.ekGameState.currentPlayer = playerOrder.shift();
     emitState(socket.ekGameState);
-    // console.log('Player order after:', socket.ekGameState.playerOrder)
-    // console.log('Current player:', socket.ekGameState.currentPlayer)
     // reset attack counter if attack wasn't played
   }
 
@@ -209,11 +196,9 @@ io.on('connection', socket => {
     const x = setInterval(() => {
       // if attack count > 0 and cardType !== attack {reset attack count}
       io.of('/').to(socket.ekGameState.room).emit('card-countdown', timer)
-      // console.log(timer)
       timer -= 1;
       if (timer < 0) {
         clearInterval(x);
-        // console.log('timer up')
         switch (userCardType) {
           case 'attack':
             // increment attack count
@@ -230,6 +215,7 @@ io.on('connection', socket => {
 
             endTurn();
             break;
+            // TODO fix case for favor
           /* case 'favor':
             // remove card from affectedPlayer and give it to current player
             const giveCard = socket.ekGameState[affectedUser].splice(0, 1)
@@ -257,8 +243,6 @@ io.on('connection', socket => {
             const stealedCard = socket.ekGameState[affectedUser].splice(affectedUserIdx, 1);
             socket.ekGameState[currPlayer].push(stealedCard[0]);
             break;
-            //I feel like there might not be a reason for a default
-            // console.log('default');
         }
         emitState(socket.ekGameState);
       }
@@ -297,45 +281,35 @@ io.on('connection', socket => {
   // AUTH/USER DATA LISTENERS
   socket.on('get-user-data', async user => {
     const userData = await controller.getUserData(user)
-    // console.log(userData)
     socket.emit('send-user-data', userData)
   })
   socket.on('create-user', async user => {
-    // console.log('~~ DATA FROM LOGIN ~~ ', user);
     const createUser = await controller.createUser(user)
     const userData = await controller.getUserData(user)
-    // console.log(userData)
     socket.emit('send-user-data', userData)
   })
 
   // PROFILE CHANGES
   socket.on('get-friend-data', async user => {
     const userData = await controller.getFriendData(user)
-    // console.log(userData)
     socket.emit('send-friend-data', userData)
   })
   socket.on('add-friend', user => {
-    console.log('~~ ADD FRIEND ~~ ', user);
     controller.updateFriendList(user)
   })
   socket.on('remove-friend', async user => {
-    console.log('~~ REMOVE FRIEND ~~ ', user);
     await controller.updateFriendList(user);
     const userData = await controller.getUserData(user)
-    // console.log(userData)
     socket.emit('send-user-data', userData)
   })
   socket.on('edit-user', async user => {
-    // console.log('~~ EDIT USER ~~ ', user);
     const createUser = await controller.updateUser(user)
     const userData = await controller.getUserData(user)
-    // console.log(userData)
     socket.emit('send-user-data', userData)
   })
   socket.on('post-edit-avatar', async user => {
     const updateUser = await controller.updateUser(user)
     const userData = await controller.getUserData(user)
-    // console.log(userData)
     socket.emit('send-user-data', userData)
   })
 
@@ -345,8 +319,6 @@ io.on('connection', socket => {
     console.log(userData)
     socket.emit('search-result', userData)
   })
-
-
 
   // ROOM LISTENERS
   socket.on('host-room', userObj => {
@@ -360,27 +332,21 @@ io.on('connection', socket => {
     controller.createRoom(roomObj);
 
     socket.emit('update-room', roomId)
-    // console.log('Rooms available', io.of('/').adapter.rooms)
   })
   socket.on('join-room', async userObj => {
-    // console.log(userObj)
     socket.join(`${userObj.room}`)
     const sendUpdate = await controller.addPlayer(userObj.room, userObj)
     const roomData = await controller.getRoomData(userObj.room)
     io.in(`${userObj.room}`).emit('joined', roomData);
-    // console.log('players in room after joining', io.of('/').adapter.rooms)
   })
 
-
   socket.on('join-game', (room) => {
-    // console.log(room, 'room')
     socket.to(`${room}`).emit('start-join', (room))
   })
   socket.on('get-all-rooms', async cb => {
     const allRooms = await controller.getAllRooms()
     console.log(allRooms, 'ALL ROOMS')
     cb(allRooms)
-    // socket.emit('send-user-data', userData)
   })
   socket.on('return-lobby', () => {
     io.of('/').to(socket.ekGameState.room).emit('return-lobby');
@@ -388,7 +354,7 @@ io.on('connection', socket => {
 
   const rooms = io.of('/').adapter.rooms;
   const sids = io.of('/').adapter.sids;
-  // console.log(rooms)
+
 
   // GAME STATE LISTENERS
   socket.on('start-game', async gameState => {
@@ -396,10 +362,8 @@ io.on('connection', socket => {
   })
   socket.on('end-game', () => {
     delete socket.ekGameState
-    // console.log('Game over', socket.ekGameState)
   })
   socket.on('play-card', (userCardType, userCardIdxs, affectedUser, affectedUserIdx, insertIdx) => {
-    // console.log('in play-card', insertIdx)
     playCard(userCardType, userCardIdxs, affectedUser, affectedUserIdx, insertIdx)
   })
   socket.on('draw-card', (username) => {
@@ -423,18 +387,10 @@ io.on('connection', socket => {
     })
     removeCard(userCardIdxs, user);
     emitState(socket.ekGameState);
-    // console.log('cancelled play')
     // socket.off('nope-played')
   })
 })
 
-
 instrument(io, { auth: false });
-
-
-// UNCOMMENT AND RUN ONCE TO RECREATE DUMMY DATA
-// const { users } = require('./dummyData');
-// users.map(user => controller.createDummyData(user))
-
 
 httpServer.listen(5001, () => console.log('Listening on 5001'));

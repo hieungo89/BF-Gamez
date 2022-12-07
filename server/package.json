@@ -1,11 +1,10 @@
 {
   "name": "server",
   "version": "1.0.0",
-  "description": "",
+  "description": "Server-side for Frontend development. Contains Mongo database and Socket.io connection.",
   "main": "index.js",
   "scripts": {
-    "server": "nodemon server",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "server": "nodemon server"
   },
   "keywords": [],
   "author": "",
